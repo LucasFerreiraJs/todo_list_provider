@@ -3,6 +3,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:todo_list_provider/app/core/database/sqlite_migration_factory.dart';
 
 class SqliteConnectionFactory {
   static const _VERSION = 1;
@@ -53,7 +54,29 @@ class SqliteConnectionFactory {
     await db.execute('PRAGMA foreign_keys = ON');
   }
 
-  Future<void> _onCreate(Database db, int version) async {}
-  Future<void> _onUpgrade(Database db, int oldVersion, int version) async {}
+  Future<void> _onCreate(Database db, int version) async {
+    final batch = db.batch();
+
+    // executa todas as migrations
+    final migrations = SqliteMigrationFactory().getCreateMigration();
+    for (var migration in migrations) {
+      migration.create(batch);
+    }
+
+    batch.commit();
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int version) async {
+    final batch = db.batch();
+
+    // executa todas as migrations
+    final migrations = SqliteMigrationFactory().getUpgradeMigration(oldVersion);
+    for (var migration in migrations) {
+      migration.update(batch);
+    }
+
+    batch.commit();
+  }
+
   Future<void> _onDowngrade(Database db, int oldVersion, int version) async {}
 }
