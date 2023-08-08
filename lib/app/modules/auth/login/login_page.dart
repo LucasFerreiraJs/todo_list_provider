@@ -24,7 +24,8 @@ class LoginPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(height: 10),
+                  SizedBox(height: 50),
+                  // SizedBox(height: 10),
                   TodoListLogo(),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
