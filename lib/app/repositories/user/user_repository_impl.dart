@@ -54,6 +54,7 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  @override
   Future<void> forgotPassword(String email) async {
     try {
       final loginMethods = await _firebaseAuth.fetchSignInMethodsForEmail(email);
@@ -72,36 +73,32 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  @override
   Future<User?> googleLogin() async {
     List<String>? loginMethods;
     try {
-      final googleSignin = GoogleSignIn();
-      final googleUser = await googleSignin.signIn();
+      final googleSingIn = GoogleSignIn();
+      final googleUser = await googleSingIn.signIn();
       if (googleUser != null) {
         loginMethods = await _firebaseAuth.fetchSignInMethodsForEmail(googleUser.email);
 
         if (loginMethods.contains('password')) {
-          throw AuthException(message: 'Você já possui cadastro com esse email, caso tenha esquicido a senha por favor clique em "Esqueceu sua senha"');
+          throw AuthException(message: 'E-mail ja utilizado em outro cadastro, clique em "Esqueci a senha" para recuperar seu acesso');
         } else {
           final googleAuth = await googleUser.authentication;
-          final firebaseCrendential = GoogleAuthProvider.credential(
-            accessToken: googleAuth.accessToken,
-            idToken: googleAuth.idToken,
-          );
-
-          var userCredential = await _firebaseAuth.signInWithCredential(firebaseCrendential);
-          return userCredential.user;
+          final firebaseCredential = GoogleAuthProvider.credential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+          var userCredencial = await _firebaseAuth.signInWithCredential(firebaseCredential);
+          return userCredencial.user;
         }
       }
-    } on FirebaseAuthException catch (err, s) {
-      print(err);
+    } on FirebaseAuthException catch (e, s) {
+      print(e);
       print(s);
-
-      if (err == 'account-exists-with-different-credential') {
-        throw AuthException(message: '''
-            Login inválido você se registrou com os seguintes provedores:
-            ${loginMethods?.join()}
-        ''');
+      if (e.code == 'account-exists-with-different-credential') {
+        throw AuthException(message: '''Login não permitido, talvez você tenha se registrado com outro provedor!
+                Algumas possibilidades:
+                ${loginMethods?.join(',')}
+                ''');
       } else {
         throw AuthException(message: 'Erro ao realizar login');
       }
