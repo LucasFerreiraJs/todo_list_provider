@@ -32,57 +32,58 @@ class TodoCardFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        constraints: BoxConstraints(
-          minHeight: 120,
-          maxWidth: 150,
+      constraints: BoxConstraints(
+        minHeight: 120,
+        maxWidth: 150,
+      ),
+      margin: EdgeInsets.only(right: 10),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: selected ? context.primaryColor : Colors.white,
+        border: Border.all(
+          width: 1,
+          color: Colors.grey.withOpacity(.8),
         ),
-        margin: EdgeInsets.only(right: 10),
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: selected ? context.primaryColor : Colors.white,
-          border: Border.all(
-            width: 1,
-            color: Colors.grey.withOpacity(.8),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '${totalTasksModel?.totalTasks ?? 0} tasks',
+            style: context.titleStyle.copyWith(
+              // fontSize: 17,
+              fontSize: 17,
+              fontWeight: FontWeight.normal,
+              color: selected ? Colors.white : Colors.grey,
+            ),
           ),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${totalTasksModel?.totalTasks ?? 0} tasks',
-              style: context.titleStyle.copyWith(
-                // fontSize: 17,
-                fontSize: 17,
-                fontWeight: FontWeight.normal,
-                color: selected ? Colors.white : Colors.grey,
-              ),
+          Text(
+            label,
+            style: TextStyle(
+              // fontSize: 20,
+              fontSize: 27,
+              fontWeight: FontWeight.bold,
+              color: selected ? Colors.white : Colors.grey,
             ),
-            Text(
-              label,
-              style: TextStyle(
-                // fontSize: 20,
-                fontSize: 27,
-                fontWeight: FontWeight.bold,
-                color: selected ? Colors.white : Colors.grey,
-              ),
+          ),
+          TweenAnimationBuilder(
+            tween: Tween(
+              begin: 0.0,
+              end: _getPercentFinish(),
             ),
-            TweenAnimationBuilder(
-              tween: Tween(
-                begin: 0.0,
-                end: _getPercentFinish(),
-              ),
-              duration: Duration(seconds: 1),
-              builder: (context, value, child) {
-                return LinearProgressIndicator(
-                  backgroundColor: selected ? context.primaryColorLight : Colors.grey.shade300,
-                  valueColor: AlwaysStoppedAnimation<Color>(selected ? Colors.white : context.primaryColor),
-                  value: value,
-                );
-              },
-            ),
-          ],
-        ));
+            duration: Duration(seconds: 1),
+            builder: (context, value, child) {
+              return LinearProgressIndicator(
+                backgroundColor: selected ? context.primaryColorLight : Colors.grey.shade300,
+                valueColor: AlwaysStoppedAnimation<Color>(selected ? Colors.white : context.primaryColor),
+                value: value,
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

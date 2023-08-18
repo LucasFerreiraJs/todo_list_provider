@@ -23,7 +23,7 @@ class SqliteConnectionFactory {
     return _instance!;
   }
 
-  Future<Database> opneConnection() async {
+  Future<Database> openConnection() async {
     var databasePath = await getDatabasesPath();
     var databasePathFinal = join(databasePath, _DATABASE_NAME);
 
