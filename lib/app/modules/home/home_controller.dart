@@ -14,6 +14,8 @@ class HomeController extends DefaultChangeNotifier {
   TotalTasksModel? weekTotalTasks;
   List<TaskModel> allTasks = [];
   List<TaskModel> filteredTasks = [];
+  DateTime? initialDateOfWeek;
+  DateTime? selectedDay;
 
   HomeController({required TaskService taskService}) : _taskService = taskService;
 
@@ -47,36 +49,48 @@ class HomeController extends DefaultChangeNotifier {
   }
 
   Future<void> findTasks({required TaskFilterEnum filter}) async {
-    try {
-      filterSelected = filter;
-      showLoading();
-      notifyListeners();
-      List<TaskModel> tasks;
-      print('filter ${filter}');
-      switch (filter) {
-        case TaskFilterEnum.today:
-          tasks = await _taskService.getToday();
-          break;
-        case TaskFilterEnum.tomorrow:
-          tasks = await _taskService.getTomorrow();
-          break;
-        case TaskFilterEnum.week:
-          final weekModel = await _taskService.getWeek();
-          tasks = weekModel.tasks;
-          break;
-      }
-
-      allTasks = tasks;
-      filteredTasks = tasks;
-    } catch (err, s) {
-      print('err $err');
-      print('stacktrace $s');
-      hideLoading();
-    } finally {
-      print('finally');
-      hideLoading();
-      notifyListeners();
+    filterSelected = filter;
+    showLoading();
+    notifyListeners();
+    List<TaskModel> tasks;
+    print('filter ${filter}');
+    switch (filter) {
+      case TaskFilterEnum.today:
+        tasks = await _taskService.getToday();
+        break;
+      case TaskFilterEnum.tomorrow:
+        tasks = await _taskService.getTomorrow();
+        break;
+      case TaskFilterEnum.week:
+        final weekModel = await _taskService.getWeek();
+        initialDateOfWeek = weekModel.startDate;
+        tasks = weekModel.tasks;
+        break;
     }
+
+    allTasks = tasks;
+    filteredTasks = tasks;
+
+    if (filter == TaskFilterEnum.week) {
+      if (selectedDay != null) {
+        filterByDay(selectedDay!);
+      } else if (initialDateOfWeek != null) {
+        filterByDay(initialDateOfWeek!);
+      }
+    } else {
+      selectedDay = null;
+    }
+
+    hideLoading();
+    notifyListeners();
+  }
+
+  void filterByDay(DateTime date) {
+    selectedDay = date;
+    filteredTasks = allTasks.where((task) {
+      return task.dateTime == date;
+    }).toList();
+    notifyListeners();
   }
 
   Future<void> refreshPage() async {
