@@ -11,6 +11,11 @@ class TaskServiceImpl implements TaskService {
   }) : _taskRepository = taskRepository;
 
   @override
+  Future<void> save(DateTime date, String description) async {
+    await _taskRepository.save(date, description);
+  }
+
+  @override
   Future<List<TaskModel>> getToday() {
     return _taskRepository.findByPeriod(DateTime.now(), DateTime.now());
   }
@@ -34,11 +39,5 @@ class TaskServiceImpl implements TaskService {
     endFilter = startFilter.add(Duration(days: 7));
     final tasks = await _taskRepository.findByPeriod(startFilter, endFilter);
     return WeekTaskModel(startDate: startFilter, endDate: endFilter, tasks: tasks);
-  }
-
-  @override
-  Future<void> save(DateTime date, String description) {
-    // TODO: implement save
-    throw UnimplementedError();
   }
 }

@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:ffi';
+
 class TaskModel {
   final int id;
   final String description;
@@ -15,9 +17,9 @@ class TaskModel {
   factory TaskModel.loadFromDB(Map<String, dynamic> task) {
     return TaskModel(
       id: task['id'],
-      description: task['description'],
+      description: task['descricao'],
       dateTime: DateTime.parse(task['data_hora']),
-      finished: task['finalizado'],
+      finished: task['finalizado'] == 0 ? false : true,
     );
   }
 }

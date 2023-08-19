@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:todo_list_provider/app/core/auth/auth_provider.dart';
+import 'package:todo_list_provider/app/core/ui/notifier/default_listener_notifier.dart';
 import 'package:todo_list_provider/app/core/ui/theme_extensions.dart';
 import 'package:todo_list_provider/app/core/ui/todo_list_icons.dart';
+import 'package:todo_list_provider/app/models/task_filter_enum.dart';
+import 'package:todo_list_provider/app/modules/home/home_controller.dart';
 import 'package:todo_list_provider/app/modules/home/widget/home_drawer.dart';
 import 'package:todo_list_provider/app/modules/home/widget/home_filters.dart';
 import 'package:todo_list_provider/app/modules/home/widget/home_header.dart';
@@ -10,10 +12,33 @@ import 'package:todo_list_provider/app/modules/home/widget/home_tasks.dart';
 import 'package:todo_list_provider/app/modules/home/widget/home_week_filter.dart';
 import 'package:todo_list_provider/app/modules/tasks/tasks_module.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  final HomeController _homeController;
 
-  void _goToCreate(BuildContext context) {
+  HomePage({super.key, required HomeController homeController}) : _homeController = homeController;
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    DefaultListenerNotifier(changeNotifier: widget._homeController).listener(
+      context: context,
+      successCallback: (notifier, listenerInstance) {
+        listenerInstance.dispose();
+      },
+    );
+
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      widget._homeController.loadTotalTasks();
+      widget._homeController.findTasks(filter: TaskFilterEnum.today);
+    });
+  }
+
+  Future<void> _goToCreate(BuildContext context) async {
     // *  statefull widget conseguimos usar o context como atributo
     // * stateless widget devemos repassar o context
     // ? não podemos passar TaskCreatePage(controller: context.read()) por pertencer a outro módulo, navegação por módulo
@@ -22,7 +47,7 @@ class HomePage extends StatelessWidget {
     //   MaterialPageRoute(builder: (_) => TasksModule().getPage('/task/create', context)),
     // );
 
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -38,6 +63,8 @@ class HomePage extends StatelessWidget {
         },
       ),
     );
+
+    widget._homeController.refreshPage();
   }
 
   @override
@@ -71,18 +98,19 @@ class HomePage extends StatelessWidget {
                 minWidth: constraints.maxWidth,
               ),
               child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 20),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HomeHeader(),
-                        HomeFilters(),
-                        HomeWeekFilter(),
-                        HomeTasks(),
-                      ],
-                    ),
-                  )),
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      HomeHeader(),
+                      HomeFilters(),
+                      HomeWeekFilter(),
+                      HomeTasks(),
+                    ],
+                  ),
+                ),
+              ),
             ),
           );
         },

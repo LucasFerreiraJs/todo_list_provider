@@ -12,7 +12,7 @@ class TaskRepositoryImpl implements TaskRepository {
     final conn = await _sqliteConnectionFactory.openConnection();
     await conn.insert('todo', {
       'id': null,
-      'description': description,
+      'descricao': description,
       'data_hora': date.toIso8601String(),
       'finalizado': 0,
     });
